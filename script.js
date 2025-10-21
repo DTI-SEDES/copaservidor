@@ -70,6 +70,15 @@ const tournamentData = {
     }
 };
 
+// Credenciais do ADM
+const ADMIN_CREDENTIALS = {
+    username: "admin",
+    password: "Senha@1234"
+};
+
+// Estado da aplicação
+let isAdmin = false;
+
 // Carregar dados salvos do localStorage
 function loadSavedData() {
     const savedData = localStorage.getItem('futsalTournamentData');
@@ -81,16 +90,84 @@ function loadSavedData() {
 
 // Salvar dados no localStorage
 function saveData() {
+    if (!isAdmin) {
+        showLoginModal();
+        return;
+    }
     localStorage.setItem('futsalTournamentData', JSON.stringify(tournamentData));
     alert('Dados salvos com sucesso!');
 }
 
 // Resetar dados
 function resetData() {
+    if (!isAdmin) {
+        showLoginModal();
+        return;
+    }
+    
     if (confirm('Tem certeza que deseja resetar todos os dados?')) {
         localStorage.removeItem('futsalTournamentData');
         location.reload();
     }
+}
+
+// Mostrar modal de login
+function showLoginModal() {
+    const modal = document.getElementById('loginModal');
+    modal.style.display = 'block';
+}
+
+// Fechar modal de login
+function closeLoginModal() {
+    const modal = document.getElementById('loginModal');
+    modal.style.display = 'none';
+    document.getElementById('loginForm').reset();
+}
+
+// Fazer login
+function login(username, password) {
+    if (username === ADMIN_CREDENTIALS.username && password === ADMIN_CREDENTIALS.password) {
+        isAdmin = true;
+        closeLoginModal();
+        updateUIForAdmin();
+        alert('Login realizado com sucesso!');
+        return true;
+    } else {
+        alert('Credenciais inválidas!');
+        return false;
+    }
+}
+
+// Fazer logout
+function logout() {
+    isAdmin = false;
+    updateUIForAdmin();
+    alert('Logout realizado com sucesso!');
+}
+
+// Atualizar UI baseado no estado do ADM
+function updateUIForAdmin() {
+    const adminControls = document.querySelector('.admin-controls');
+    const actionButtons = document.querySelector('.action-buttons');
+    const container = document.querySelector('.container');
+    
+    if (isAdmin) {
+        adminControls.classList.add('active');
+        actionButtons.style.display = 'flex';
+        container.classList.remove('read-only');
+        document.getElementById('adminLogin').style.display = 'none';
+        document.getElementById('adminLogout').style.display = 'inline-block';
+    } else {
+        adminControls.classList.remove('active');
+        actionButtons.style.display = 'none';
+        container.classList.add('read-only');
+        document.getElementById('adminLogin').style.display = 'inline-block';
+        document.getElementById('adminLogout').style.display = 'none';
+    }
+    
+    // Re-renderizar jogos para atualizar estado de edição
+    renderMatches();
+    renderFinals();
 }
 
 // Calcular classificação dos grupos
@@ -313,9 +390,10 @@ function renderMatches() {
                 <div class="vs">X</div>
                 <div class="score-display">${match.score2}</div>`;
             } else {
-                html += `<input type="number" class="score-input" data-match="${match.team1}-${match.team2}" data-team="1" value="" min="0">
+                const canEdit = isAdmin ? '' : 'readonly';
+                html += `<input type="number" class="score-input" data-match="${match.team1}-${match.team2}" data-team="1" value="" min="0" ${canEdit}>
                 <div class="vs">X</div>
-                <input type="number" class="score-input" data-match="${match.team1}-${match.team2}" data-team="2" value="" min="0">`;
+                <input type="number" class="score-input" data-match="${match.team1}-${match.team2}" data-team="2" value="" min="0" ${canEdit}>`;
             }
             
             html += `<div class="team">${match.team2}</div>
@@ -327,35 +405,37 @@ function renderMatches() {
         matchesContainer.appendChild(matchDayDiv);
     }
 
-    // Adicionar event listeners aos inputs
-    document.querySelectorAll('.score-input').forEach(input => {
-        input.addEventListener('change', function() {
-            const matchId = this.getAttribute('data-match');
-            const team = this.getAttribute('data-team');
-            const value = this.value === '' ? null : parseInt(this.value);
-            
-            const match = tournamentData.matches.find(m => 
-                `${m.team1}-${m.team2}` === matchId
-            );
-            
-            if (match) {
-                if (team === '1') {
-                    match.score1 = value;
-                } else {
-                    match.score2 = value;
-                }
+    // Adicionar event listeners aos inputs (apenas para admin)
+    if (isAdmin) {
+        document.querySelectorAll('.score-input').forEach(input => {
+            input.addEventListener('change', function() {
+                const matchId = this.getAttribute('data-match');
+                const team = this.getAttribute('data-team');
+                const value = this.value === '' ? null : parseInt(this.value);
                 
-                // Se ambos os scores estão preenchidos, atualizar a classificação
-                if (match.score1 !== null && match.score2 !== null) {
-                    calculateGroupStandings();
-                    renderGroups();
-                    renderOverallStandings();
-                    renderFinals();
-                    updateStats();
+                const match = tournamentData.matches.find(m => 
+                    `${m.team1}-${m.team2}` === matchId
+                );
+                
+                if (match) {
+                    if (team === '1') {
+                        match.score1 = value;
+                    } else {
+                        match.score2 = value;
+                    }
+                    
+                    // Se ambos os scores estão preenchidos, atualizar a classificação
+                    if (match.score1 !== null && match.score2 !== null) {
+                        calculateGroupStandings();
+                        renderGroups();
+                        renderOverallStandings();
+                        renderFinals();
+                        updateStats();
+                    }
                 }
-            }
+            });
         });
-    });
+    }
 }
 
 // Renderizar fase final
@@ -390,9 +470,10 @@ function renderFinals() {
             <div class="vs">X</div>
             <div class="score-display">${match.score2}</div>`;
         } else {
-            semifinalsHtml += `<input type="number" class="score-input" data-final="semifinal${index}" data-team="1" value="" min="0">
+            const canEdit = isAdmin ? '' : 'readonly';
+            semifinalsHtml += `<input type="number" class="score-input" data-final="semifinal${index}" data-team="1" value="" min="0" ${canEdit}>
             <div class="vs">X</div>
-            <input type="number" class="score-input" data-final="semifinal${index}" data-team="2" value="" min="0">`;
+            <input type="number" class="score-input" data-final="semifinal${index}" data-team="2" value="" min="0" ${canEdit}>`;
         }
         
         semifinalsHtml += `<div class="team">${team2Name}</div>
@@ -412,48 +493,51 @@ function renderFinals() {
         <div class="vs">X</div>
         <div class="score-display">${finalMatch.score2}</div>`;
     } else {
-        finalHtml += `<input type="number" class="score-input" data-final="final" data-team="1" value="" min="0">
+        const canEdit = isAdmin ? '' : 'readonly';
+        finalHtml += `<input type="number" class="score-input" data-final="final" data-team="1" value="" min="0" ${canEdit}>
         <div class="vs">X</div>
-        <input type="number" class="score-input" data-final="final" data-team="2" value="" min="0">`;
+        <input type="number" class="score-input" data-final="final" data-team="2" value="" min="0" ${canEdit}>`;
     }
     
     finalHtml += `<div class="team">${finalMatch.team2}</div>
     </div>`;
     finalContainer.innerHTML = finalHtml;
 
-    // Adicionar event listeners aos inputs da fase final
-    document.querySelectorAll('.score-input[data-final]').forEach(input => {
-        input.addEventListener('change', function() {
-            const finalType = this.getAttribute('data-final');
-            const team = this.getAttribute('data-team');
-            const value = this.value === '' ? null : parseInt(this.value);
-            
-            if (finalType.startsWith('semifinal')) {
-                const index = parseInt(finalType.slice(9));
-                const match = tournamentData.finals.semifinals[index];
+    // Adicionar event listeners aos inputs da fase final (apenas para admin)
+    if (isAdmin) {
+        document.querySelectorAll('.score-input[data-final]').forEach(input => {
+            input.addEventListener('change', function() {
+                const finalType = this.getAttribute('data-final');
+                const team = this.getAttribute('data-team');
+                const value = this.value === '' ? null : parseInt(this.value);
                 
-                if (match) {
+                if (finalType.startsWith('semifinal')) {
+                    const index = parseInt(finalType.slice(9));
+                    const match = tournamentData.finals.semifinals[index];
+                    
+                    if (match) {
+                        if (team === '1') {
+                            match.score1 = value;
+                        } else {
+                            match.score2 = value;
+                        }
+                        
+                        // Atualizar final se necessário
+                        if (match.score1 !== null && match.score2 !== null) {
+                            updateFinalTeams();
+                        }
+                    }
+                } else if (finalType === 'final') {
+                    const match = tournamentData.finals.final;
                     if (team === '1') {
                         match.score1 = value;
                     } else {
                         match.score2 = value;
                     }
-                    
-                    // Atualizar final se necessário
-                    if (match.score1 !== null && match.score2 !== null) {
-                        updateFinalTeams();
-                    }
                 }
-            } else if (finalType === 'final') {
-                const match = tournamentData.finals.final;
-                if (team === '1') {
-                    match.score1 = value;
-                } else {
-                    match.score2 = value;
-                }
-            }
+            });
         });
-    });
+    }
 }
 
 // Atualizar times na final com base nas semifinais
@@ -557,6 +641,7 @@ function init() {
     renderFinals();
     renderRules();
     updateStats();
+    updateUIForAdmin();
     
     // Configurar tabs
     document.querySelectorAll('.tab').forEach(tab => {
@@ -565,17 +650,4 @@ function init() {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             
-            // Adicionar classe active à tab clicada
-            this.classList.add('active');
-            const tabId = this.getAttribute('data-tab');
-            document.getElementById(tabId).classList.add('active');
-        });
-    });
-    
-    // Configurar botões de ação
-    document.getElementById('saveData').addEventListener('click', saveData);
-    document.getElementById('resetData').addEventListener('click', resetData);
-}
-
-// Iniciar a aplicação quando o DOM estiver carregado
-document.addEventListener('DOMContentLoaded', init);
+            // Ad
