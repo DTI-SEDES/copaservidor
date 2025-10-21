@@ -650,4 +650,39 @@ function init() {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             
-            // Ad
+            // Adicionar classe active à tab clicada
+            this.classList.add('active');
+            const tabId = this.getAttribute('data-tab');
+            document.getElementById(tabId).classList.add('active');
+        });
+    });
+    
+    // Configurar botões de ação
+    document.getElementById('saveData').addEventListener('click', saveData);
+    document.getElementById('resetData').addEventListener('click', resetData);
+    
+    // Configurar login/logout
+    document.getElementById('adminLogin').addEventListener('click', showLoginModal);
+    document.getElementById('adminLogout').addEventListener('click', logout);
+    
+    // Configurar modal de login
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        login(username, password);
+    });
+    
+    document.querySelector('.close').addEventListener('click', closeLoginModal);
+    
+    // Fechar modal ao clicar fora
+    window.addEventListener('click', function(e) {
+        const modal = document.getElementById('loginModal');
+        if (e.target === modal) {
+            closeLoginModal();
+        }
+    });
+}
+
+// Iniciar a aplicação quando o DOM estiver carregado
+document.addEventListener('DOMContentLoaded', init);
