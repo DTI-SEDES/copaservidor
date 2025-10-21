@@ -11,19 +11,17 @@
         <h1>Torneio de Futsal Masculino</h1>
         <div class="subtitle">Semana do Servidor - 13 a 23 de Outubro</div>
     </header>
-    <div class="admin-controls">
-    <div class="admin-info">
-        <div class="admin-badge">Modo Administrativo Ativo</div>
-        <button id="adminLogout" class="btn btn-reset">Logout</button>
-    </div>
-</div>
-
-<div class="action-buttons">
-    <button id="adminLogin" class="btn">Acesso ADM</button>
-    <button id="saveData" class="btn btn-save">Salvar Dados</button>
-    <button id="resetData" class="btn btn-reset">Resetar Dados</button>
-</div>
+    
     <div class="container">
+        <!-- Controles Administrativos -->
+        <div class="admin-controls">
+            <div class="admin-info">
+                <div class="admin-badge">Modo Administrativo Ativo</div>
+                <button id="adminLogout" class="btn btn-reset">Logout</button>
+            </div>
+        </div>
+
+        <!-- Estatísticas -->
         <div class="stats">
             <div class="stat-card">
                 <div class="stat-number" id="totalMatches">0</div>
@@ -39,6 +37,7 @@
             </div>
         </div>
         
+        <!-- Navegação por Tabs -->
         <div class="tabs">
             <div class="tab active" data-tab="overall">Classificação Geral</div>
             <div class="tab" data-tab="groups">Grupos</div>
@@ -47,6 +46,7 @@
             <div class="tab" data-tab="rules">Regulamento</div>
         </div>
         
+        <!-- Conteúdo das Tabs -->
         <div id="overall" class="tab-content active">
             <h2>Classificação Geral</h2>
             <div class="overall-ranking">
@@ -112,35 +112,37 @@
             </div>
         </div>
         
+        <!-- Botões de Ação -->
         <div class="action-buttons">
+            <button id="adminLogin" class="btn">Acesso ADM</button>
             <button id="saveData" class="btn btn-save">Salvar Dados</button>
             <button id="resetData" class="btn btn-reset">Resetar Dados</button>
         </div>
     </div>
 
-    <script src="script.js"></script>
     <!-- Modal de Login -->
-<div id="loginModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3>Acesso Administrativo</h3>
-            <span class="close">&times;</span>
-        </div>
-        <div class="modal-body">
-            <form id="loginForm">
-                <div class="form-group">
-                    <label for="username">Login:</label>
-                    <input type="text" id="username" name="username" required>
-                </div>
-                <div class="form-group">
-                    <label for="password">Senha:</label>
-                    <input type="password" id="password" name="password" required>
-                </div>
-                <button type="submit" class="btn btn-login">Entrar</button>
-            </form>
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Acesso Administrativo</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label for="username">Login:</label>
+                        <input type="text" id="username" name="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Senha:</label>
+                        <input type="password" id="password" name="password" required>
+                    </div>
+                    <button type="submit" class="btn btn-login">Entrar</button>
+                </form>
+            </div>
         </div>
     </div>
-</div>
-    
+
+    <script src="script.js"></script>
 </body>
 </html>
