@@ -73,7 +73,7 @@ const tournamentData = {
 // Credenciais do ADM
 const ADMIN_CREDENTIALS = {
     username: "admin",
-    password: "Senha@1234"
+    password: "copaservidor2024"
 };
 
 // Estado da aplicação
@@ -114,14 +114,19 @@ function resetData() {
 // Mostrar modal de login
 function showLoginModal() {
     const modal = document.getElementById('loginModal');
-    modal.style.display = 'block';
+    if (modal) {
+        modal.style.display = 'block';
+    }
 }
 
 // Fechar modal de login
 function closeLoginModal() {
     const modal = document.getElementById('loginModal');
-    modal.style.display = 'none';
-    document.getElementById('loginForm').reset();
+    if (modal) {
+        modal.style.display = 'none';
+        const form = document.getElementById('loginForm');
+        if (form) form.reset();
+    }
 }
 
 // Fazer login
@@ -130,7 +135,7 @@ function login(username, password) {
         isAdmin = true;
         closeLoginModal();
         updateUIForAdmin();
-        alert('Login realizado com sucesso!');
+        alert('Login administrativo realizado com sucesso!');
         return true;
     } else {
         alert('Credenciais inválidas!');
@@ -147,22 +152,23 @@ function logout() {
 
 // Atualizar UI baseado no estado do ADM
 function updateUIForAdmin() {
-    const adminControls = document.querySelector('.admin-controls');
+    const adminControls = document.getElementById('adminControls');
     const actionButtons = document.querySelector('.action-buttons');
-    const container = document.querySelector('.container');
+    const adminLoginBtn = document.getElementById('adminLogin');
+    const adminLogoutBtn = document.getElementById('adminLogout');
     
     if (isAdmin) {
-        adminControls.classList.add('active');
-        actionButtons.style.display = 'flex';
-        container.classList.remove('read-only');
-        document.getElementById('adminLogin').style.display = 'none';
-        document.getElementById('adminLogout').style.display = 'inline-block';
+        if (adminControls) adminControls.classList.add('active');
+        if (actionButtons) actionButtons.style.display = 'flex';
+        if (adminLoginBtn) adminLoginBtn.style.display = 'none';
+        if (adminLogoutBtn) adminLogoutBtn.style.display = 'inline-block';
+        document.body.classList.remove('read-only');
     } else {
-        adminControls.classList.remove('active');
-        actionButtons.style.display = 'none';
-        container.classList.add('read-only');
-        document.getElementById('adminLogin').style.display = 'inline-block';
-        document.getElementById('adminLogout').style.display = 'none';
+        if (adminControls) adminControls.classList.remove('active');
+        if (actionButtons) actionButtons.style.display = 'none';
+        if (adminLoginBtn) adminLoginBtn.style.display = 'inline-block';
+        if (adminLogoutBtn) adminLogoutBtn.style.display = 'none';
+        document.body.classList.add('read-only');
     }
     
     // Re-renderizar para atualizar estado de edição
@@ -274,14 +280,20 @@ function updateStats() {
     ).length;
     const remainingMatches = totalMatches - completedMatches;
     
-    document.getElementById('totalMatches').textContent = totalMatches;
-    document.getElementById('completedMatches').textContent = completedMatches;
-    document.getElementById('remainingMatches').textContent = remainingMatches;
+    const totalEl = document.getElementById('totalMatches');
+    const completedEl = document.getElementById('completedMatches');
+    const remainingEl = document.getElementById('remainingMatches');
+    
+    if (totalEl) totalEl.textContent = totalMatches;
+    if (completedEl) completedEl.textContent = completedMatches;
+    if (remainingEl) remainingEl.textContent = remainingMatches;
 }
 
 // Renderizar classificação geral
 function renderOverallStandings() {
     const overallTable = document.querySelector('#overallTable tbody');
+    if (!overallTable) return;
+    
     const overallStandings = calculateOverallStandings();
     
     let html = '';
@@ -310,6 +322,8 @@ function renderOverallStandings() {
 // Renderizar grupos
 function renderGroups() {
     const groupsContainer = document.querySelector('.groups-container');
+    if (!groupsContainer) return;
+
     groupsContainer.innerHTML = '';
 
     for (const group in tournamentData.groups) {
@@ -361,6 +375,8 @@ function renderGroups() {
 // Renderizar jogos
 function renderMatches() {
     const matchesContainer = document.querySelector('.matches');
+    if (!matchesContainer) return;
+    
     matchesContainer.innerHTML = '';
 
     // Agrupar jogos por data
@@ -391,9 +407,11 @@ function renderMatches() {
                 <div class="score-display">${match.score2}</div>`;
             } else {
                 const canEdit = isAdmin ? '' : 'readonly';
-                html += `<input type="number" class="score-input" data-match="${match.team1}-${match.team2}" data-team="1" value="" min="0" ${canEdit}>
+                const score1 = match.score1 !== null ? match.score1 : '';
+                const score2 = match.score2 !== null ? match.score2 : '';
+                html += `<input type="number" class="score-input" data-match="${match.team1}-${match.team2}" data-team="1" value="${score1}" min="0" ${canEdit}>
                 <div class="vs">X</div>
-                <input type="number" class="score-input" data-match="${match.team1}-${match.team2}" data-team="2" value="" min="0" ${canEdit}>`;
+                <input type="number" class="score-input" data-match="${match.team1}-${match.team2}" data-team="2" value="${score2}" min="0" ${canEdit}>`;
             }
             
             html += `<div class="team">${match.team2}</div>
@@ -443,6 +461,8 @@ function renderFinals() {
     const semifinalsContainer = document.querySelector('.semifinals');
     const finalContainer = document.querySelector('.final');
     
+    if (!semifinalsContainer || !finalContainer) return;
+
     // Semifinais
     let semifinalsHtml = '';
     tournamentData.finals.semifinals.forEach((match, index) => {
@@ -471,9 +491,11 @@ function renderFinals() {
             <div class="score-display">${match.score2}</div>`;
         } else {
             const canEdit = isAdmin ? '' : 'readonly';
-            semifinalsHtml += `<input type="number" class="score-input" data-final="semifinal${index}" data-team="1" value="" min="0" ${canEdit}>
+            const score1 = match.score1 !== null ? match.score1 : '';
+            const score2 = match.score2 !== null ? match.score2 : '';
+            semifinalsHtml += `<input type="number" class="score-input" data-final="semifinal${index}" data-team="1" value="${score1}" min="0" ${canEdit}>
             <div class="vs">X</div>
-            <input type="number" class="score-input" data-final="semifinal${index}" data-team="2" value="" min="0" ${canEdit}>`;
+            <input type="number" class="score-input" data-final="semifinal${index}" data-team="2" value="${score2}" min="0" ${canEdit}>`;
         }
         
         semifinalsHtml += `<div class="team">${team2Name}</div>
@@ -494,9 +516,11 @@ function renderFinals() {
         <div class="score-display">${finalMatch.score2}</div>`;
     } else {
         const canEdit = isAdmin ? '' : 'readonly';
-        finalHtml += `<input type="number" class="score-input" data-final="final" data-team="1" value="" min="0" ${canEdit}>
+        const score1 = finalMatch.score1 !== null ? finalMatch.score1 : '';
+        const score2 = finalMatch.score2 !== null ? finalMatch.score2 : '';
+        finalHtml += `<input type="number" class="score-input" data-final="final" data-team="1" value="${score1}" min="0" ${canEdit}>
         <div class="vs">X</div>
-        <input type="number" class="score-input" data-final="final" data-team="2" value="" min="0" ${canEdit}>`;
+        <input type="number" class="score-input" data-final="final" data-team="2" value="${score2}" min="0" ${canEdit}>`;
     }
     
     finalHtml += `<div class="team">${finalMatch.team2}</div>
@@ -563,6 +587,7 @@ function updateFinalTeams() {
 // Renderizar regulamento
 function renderRules() {
     const rulesContainer = document.querySelector('.rules-container');
+    if (!rulesContainer) return;
     
     const rules = `
         <div class="rules-section">
@@ -658,22 +683,35 @@ function init() {
     });
     
     // Configurar botões de ação
-    document.getElementById('saveData').addEventListener('click', saveData);
-    document.getElementById('resetData').addEventListener('click', resetData);
+    const saveBtn = document.getElementById('saveData');
+    const resetBtn = document.getElementById('resetData');
+    
+    if (saveBtn) saveBtn.addEventListener('click', saveData);
+    if (resetBtn) resetBtn.addEventListener('click', resetData);
     
     // Configurar login/logout
-    document.getElementById('adminLogin').addEventListener('click', showLoginModal);
-    document.getElementById('adminLogout').addEventListener('click', logout);
+    const adminLoginBtn = document.getElementById('adminLogin');
+    const adminLogoutBtn = document.getElementById('adminLogout');
+    
+    if (adminLoginBtn) adminLoginBtn.addEventListener('click', showLoginModal);
+    if (adminLogoutBtn) adminLogoutBtn.addEventListener('click', logout);
     
     // Configurar modal de login
-    document.getElementById('loginForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        const username = document.getElementById('username').value;
-        const password = document.getElementById('password').value;
-        login(username, password);
-    });
+    const loginForm = document.getElementById('loginForm');
+    const closeBtn = document.querySelector('.close');
     
-    document.querySelector('.close').addEventListener('click', closeLoginModal);
+    if (loginForm) {
+        loginForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            login(username, password);
+        });
+    }
+    
+    if (closeBtn) {
+        closeBtn.addEventListener('click', closeLoginModal);
+    }
     
     // Fechar modal ao clicar fora
     window.addEventListener('click', function(e) {
@@ -682,6 +720,12 @@ function init() {
             closeLoginModal();
         }
     });
+    
+    // Verificar se já está logado
+    if (localStorage.getItem('adminLoggedIn') === 'true') {
+        isAdmin = true;
+        updateUIForAdmin();
+    }
 }
 
 // Iniciar a aplicação quando o DOM estiver carregado
