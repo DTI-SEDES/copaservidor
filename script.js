@@ -1,6 +1,3 @@
-
-
-
 // Dados iniciais do torneio com resultados já conhecidos
 const tournamentData = {
     groups: {
@@ -391,4 +388,301 @@ function renderMatches() {
             if (isCompleted) {
                 html += `<div class="score-display">${match.score1}</div>
                 <div class="vs">X</div>
-                <div class="score-display">
+                <div class="score-display">${match.score2}</div>`;
+            } else {
+                const canEdit = isAdmin ? '' : 'readonly';
+                html += `<input type="number" class="score-input" data-match="${match.team1}-${match.team2}" data-team="1" value="" min="0" ${canEdit}>
+                <div class="vs">X</div>
+                <input type="number" class="score-input" data-match="${match.team1}-${match.team2}" data-team="2" value="" min="0" ${canEdit}>`;
+            }
+            
+            html += `<div class="team">${match.team2}</div>
+                <div class="group-badge">Grupo ${match.group}</div>
+            </div>`;
+        });
+        
+        matchDayDiv.innerHTML = html;
+        matchesContainer.appendChild(matchDayDiv);
+    }
+
+    // Adicionar event listeners aos inputs (apenas para admin)
+    if (isAdmin) {
+        document.querySelectorAll('.score-input').forEach(input => {
+            input.addEventListener('change', function() {
+                const matchId = this.getAttribute('data-match');
+                const team = this.getAttribute('data-team');
+                const value = this.value === '' ? null : parseInt(this.value);
+                
+                const match = tournamentData.matches.find(m => 
+                    `${m.team1}-${m.team2}` === matchId
+                );
+                
+                if (match) {
+                    if (team === '1') {
+                        match.score1 = value;
+                    } else {
+                        match.score2 = value;
+                    }
+                    
+                    // Se ambos os scores estão preenchidos, atualizar a classificação
+                    if (match.score1 !== null && match.score2 !== null) {
+                        calculateGroupStandings();
+                        renderGroups();
+                        renderOverallStandings();
+                        renderFinals();
+                        updateStats();
+                    }
+                }
+            });
+        });
+    }
+}
+
+// Renderizar fase final
+function renderFinals() {
+    const semifinalsContainer = document.querySelector('.semifinals');
+    const finalContainer = document.querySelector('.final');
+    
+    // Semifinais
+    let semifinalsHtml = '';
+    tournamentData.finals.semifinals.forEach((match, index) => {
+        // Determinar times classificados
+        let team1Name = match.team1;
+        let team2Name = match.team2;
+        
+        if (match.team1.startsWith('1º')) {
+            const group = match.team1.slice(2);
+            team1Name = tournamentData.groups[group][0]?.name || match.team1;
+        }
+        
+        if (match.team2.startsWith('1º')) {
+            const group = match.team2.slice(2);
+            team2Name = tournamentData.groups[group][0]?.name || match.team2;
+        }
+        
+        const isCompleted = match.score1 !== null && match.score2 !== null;
+        
+        semifinalsHtml += `<div class="match ${isCompleted ? 'completed' : ''}">
+            <div class="team">${team1Name}</div>`;
+        
+        if (isCompleted) {
+            semifinalsHtml += `<div class="score-display">${match.score1}</div>
+            <div class="vs">X</div>
+            <div class="score-display">${match.score2}</div>`;
+        } else {
+            const canEdit = isAdmin ? '' : 'readonly';
+            semifinalsHtml += `<input type="number" class="score-input" data-final="semifinal${index}" data-team="1" value="" min="0" ${canEdit}>
+            <div class="vs">X</div>
+            <input type="number" class="score-input" data-final="semifinal${index}" data-team="2" value="" min="0" ${canEdit}>`;
+        }
+        
+        semifinalsHtml += `<div class="team">${team2Name}</div>
+        </div>`;
+    });
+    semifinalsContainer.innerHTML = semifinalsHtml;
+
+    // Final
+    const finalMatch = tournamentData.finals.final;
+    const isFinalCompleted = finalMatch.score1 !== null && finalMatch.score2 !== null;
+    
+    let finalHtml = `<div class="match ${isFinalCompleted ? 'completed' : ''}">
+        <div class="team">${finalMatch.team1}</div>`;
+    
+    if (isFinalCompleted) {
+        finalHtml += `<div class="score-display">${finalMatch.score1}</div>
+        <div class="vs">X</div>
+        <div class="score-display">${finalMatch.score2}</div>`;
+    } else {
+        const canEdit = isAdmin ? '' : 'readonly';
+        finalHtml += `<input type="number" class="score-input" data-final="final" data-team="1" value="" min="0" ${canEdit}>
+        <div class="vs">X</div>
+        <input type="number" class="score-input" data-final="final" data-team="2" value="" min="0" ${canEdit}>`;
+    }
+    
+    finalHtml += `<div class="team">${finalMatch.team2}</div>
+    </div>`;
+    finalContainer.innerHTML = finalHtml;
+
+    // Adicionar event listeners aos inputs da fase final (apenas para admin)
+    if (isAdmin) {
+        document.querySelectorAll('.score-input[data-final]').forEach(input => {
+            input.addEventListener('change', function() {
+                const finalType = this.getAttribute('data-final');
+                const team = this.getAttribute('data-team');
+                const value = this.value === '' ? null : parseInt(this.value);
+                
+                if (finalType.startsWith('semifinal')) {
+                    const index = parseInt(finalType.slice(9));
+                    const match = tournamentData.finals.semifinals[index];
+                    
+                    if (match) {
+                        if (team === '1') {
+                            match.score1 = value;
+                        } else {
+                            match.score2 = value;
+                        }
+                        
+                        // Atualizar final se necessário
+                        if (match.score1 !== null && match.score2 !== null) {
+                            updateFinalTeams();
+                        }
+                    }
+                } else if (finalType === 'final') {
+                    const match = tournamentData.finals.final;
+                    if (team === '1') {
+                        match.score1 = value;
+                    } else {
+                        match.score2 = value;
+                    }
+                }
+            });
+        });
+    }
+}
+
+// Atualizar times na final com base nas semifinais
+function updateFinalTeams() {
+    const sf1 = tournamentData.finals.semifinals[0];
+    const sf2 = tournamentData.finals.semifinals[1];
+    
+    if (sf1.score1 !== null && sf1.score2 !== null) {
+        tournamentData.finals.final.team1 = sf1.score1 > sf1.score2 ? 
+            (sf1.team1.startsWith('1º') ? tournamentData.groups[sf1.team1.slice(2)][0]?.name : sf1.team1) : 
+            (sf1.team2.startsWith('1º') ? tournamentData.groups[sf1.team2.slice(2)][0]?.name : sf1.team2);
+    }
+    
+    if (sf2.score1 !== null && sf2.score2 !== null) {
+        tournamentData.finals.final.team2 = sf2.score1 > sf2.score2 ? 
+            (sf2.team1.startsWith('1º') ? tournamentData.groups[sf2.team1.slice(2)][0]?.name : sf2.team1) : 
+            (sf2.team2.startsWith('1º') ? tournamentData.groups[sf2.team2.slice(2)][0]?.name : sf2.team2);
+    }
+    
+    renderFinals();
+}
+
+// Renderizar regulamento
+function renderRules() {
+    const rulesContainer = document.querySelector('.rules-container');
+    
+    const rules = `
+        <div class="rules-section">
+            <h3>Objetivos</h3>
+            <p>Promover o esporte entre servidores públicos do Poder Executivo Estadual.</p>
+        </div>
+        
+        <div class="rules-section">
+            <h3>Formato da Competição</h3>
+            <ul class="rules-list">
+                <li>16 equipes divididas em 4 grupos de 4 times cada</li>
+                <li>Fase de grupos: todos contra todos dentro do grupo</li>
+                <li>Classificam os primeiros colocados de cada grupo para as semifinais</li>
+                <li>Semifinais: 1ºA x 1ºB e 1ºC x 1ºD</li>
+                <li>Final: vencedores das semifinais</li>
+            </ul>
+        </div>
+        
+        <div class="rules-section">
+            <h3>Duração dos Jogos</h3>
+            <ul class="rules-list">
+                <li>30 minutos divididos em dois tempos de 15 minutos</li>
+                <li>Intervalo de 4 minutos entre os tempos</li>
+            </ul>
+        </div>
+        
+        <div class="rules-section">
+            <h3>Pontuação</h3>
+            <ul class="rules-list">
+                <li>Vitória: 3 pontos</li>
+                <li>Empate: 1 ponto</li>
+                <li>Derrota: 0 pontos</li>
+            </ul>
+        </div>
+        
+        <div class="rules-section">
+            <h3>Critérios de Desempate</h3>
+            <ol class="rules-list">
+                <li>Confronto direto (apenas para 2 times)</li>
+                <li>Maior saldo de gols (gols pró - gols contra)</li>
+                <li>Maior número de gols pró</li>
+                <li>Menor número de gols contra</li>
+                <li>Sorteio</li>
+            </ol>
+        </div>
+        
+        <div class="rules-section">
+            <h3>Regras Importantes</h3>
+            <ul class="rules-list">
+                <li>Número mínimo de jogadores: 5</li>
+                <li>WO: vitória de 1x0 para o adversário</li>
+                <li>Tolerância de atraso: 5 minutos</li>
+                <li>Substituições: ilimitadas, com aviso ao mesário</li>
+                <li>Cartão vermelho: suspensão automática do próximo jogo</li>
+                <li>Dois cartões amarelos: suspensão automática do próximo jogo</li>
+            </ul>
+        </div>
+    `;
+    
+    rulesContainer.innerHTML = rules;
+}
+
+// Inicializar a aplicação
+function init() {
+    // Carregar dados salvos
+    const savedData = loadSavedData();
+    Object.assign(tournamentData, savedData);
+    
+    // Calcular classificação inicial
+    calculateGroupStandings();
+    
+    // Renderizar todas as seções
+    renderOverallStandings();
+    renderGroups();
+    renderMatches();
+    renderFinals();
+    renderRules();
+    updateStats();
+    updateUIForAdmin();
+    
+    // Configurar tabs
+    document.querySelectorAll('.tab').forEach(tab => {
+        tab.addEventListener('click', function() {
+            // Remover classe active de todas as tabs
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            
+            // Adicionar classe active à tab clicada
+            this.classList.add('active');
+            const tabId = this.getAttribute('data-tab');
+            document.getElementById(tabId).classList.add('active');
+        });
+    });
+    
+    // Configurar botões de ação
+    document.getElementById('saveData').addEventListener('click', saveData);
+    document.getElementById('resetData').addEventListener('click', resetData);
+    
+    // Configurar login/logout
+    document.getElementById('adminLogin').addEventListener('click', showLoginModal);
+    document.getElementById('adminLogout').addEventListener('click', logout);
+    
+    // Configurar modal de login
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        login(username, password);
+    });
+    
+    document.querySelector('.close').addEventListener('click', closeLoginModal);
+    
+    // Fechar modal ao clicar fora
+    window.addEventListener('click', function(e) {
+        const modal = document.getElementById('loginModal');
+        if (e.target === modal) {
+            closeLoginModal();
+        }
+    });
+}
+
+// Iniciar a aplicação quando o DOM estiver carregado
+document.addEventListener('DOMContentLoaded', init);
