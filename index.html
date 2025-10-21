@@ -685,54 +685,56 @@
             overallTable.innerHTML = html;
         }
 
-        // Renderizar grupos
-        function renderGroups() {
-            const groupsContainer = document.querySelector('.groups-container');
-            groupsContainer.innerHTML = '';
+       // Renderizar grupos
+function renderGroups() {
+    const groupsContainer = document.querySelector('.groups-container');
+    groupsContainer.innerHTML = '';
 
-            for (const group in tournamentData.groups) {
-                const groupDiv = document.createElement('div');
-                groupDiv.className = 'group';
-                
-                let html = `<h3>Grupo ${group}</h3>`;
-                html += `<table>
-                    <thead>
-                        <tr>
-                            <th>Time</th>
-                            <th>P</th>
-                            <th>V</th>
-                            <th>E</th>
-                            <th>D</th>
-                            <th>GP</th>
-                            <th>GC</th>
-                            <th>SG</th>
-                            <th>Pts</th>
-                        </tr>
-                    </thead>
-                    <tbody>`;
-                
-                tournamentData.groups[group].forEach((team, index) => {
-                    const goalDiff = team.goalsFor - team.goalsAgainst;
-                    const isFirst = index === 0;
-                    
-                    html += `<tr ${isFirst ? 'class="qualified"' : ''}>
-                        <td>${team.name}${isFirst ? ' ✓' : ''}</td>
-                        <td>${team.played}</td>
-                        <td>${team.wins}</td>
-                        <td>${team.draws}</td>
-                        <td>${team.losses}</td>
-                        <td>${team.goalsFor}</td>
-                        <td>${team.goalsAgainst}</td>
-                        <td>${goalDiff}</td>
-                        <td><strong>${team.points}</strong></td>
-                    </tr>`;
-                });
-                
-                html += `</tbody></table>`;
-                groupDiv.innerHTML = html;
-                groupsContainer.appendChild(groupDiv);
-            }
-        }
+    for (const group in tournamentData.groups) {
+        const groupDiv = document.createElement('div');
+        groupDiv.className = 'group';
+        
+        let html = `<h3>Grupo ${group}</h3>`;
+        html += `<table>
+            <thead>
+                <tr>
+                    <th>Pos</th>
+                    <th>Time</th>
+                    <th>P</th>
+                    <th>V</th>
+                    <th>E</th>
+                    <th>D</th>
+                    <th>GP</th>
+                    <th>GC</th>
+                    <th>SG</th>
+                    <th>Pts</th>
+                </tr>
+            </thead>
+            <tbody>`;
+        
+        tournamentData.groups[group].forEach((team, index) => {
+            const goalDiff = team.goalsFor - team.goalsAgainst;
+            const isFirst = index === 0;
+            
+            html += `<tr ${isFirst ? 'class="qualified"' : ''}>
+                <td>${index + 1}º</td>
+                <td><strong>${team.name}</strong>${isFirst ? ' ✓' : ''}</td>
+                <td>${team.played}</td>
+                <td>${team.wins}</td>
+                <td>${team.draws}</td>
+                <td>${team.losses}</td>
+                <td>${team.goalsFor}</td>
+                <td>${team.goalsAgainst}</td>
+                <td>${goalDiff}</td>
+                <td><strong>${team.points}</strong></td>
+            </tr>`;
+        });
+        
+        html += `</tbody></table>`;
+        groupDiv.innerHTML = html;
+        groupsContainer.appendChild(groupDiv);
+    }
+}
 
         // Renderizar jogos
         function renderMatches() {
