@@ -90,6 +90,21 @@
             display: block;
         }
         
+        .overall-ranking {
+            background-color: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .overall-ranking h2 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--light);
+        }
+        
         .groups-container {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -133,6 +148,11 @@
             background-color: #f8f9fa;
         }
         
+        .qualified {
+            background-color: #e8f5e8 !important;
+            font-weight: 600;
+        }
+        
         .matches {
             background-color: white;
             border-radius: 8px;
@@ -163,6 +183,10 @@
             background-color: #f8f9fa;
         }
         
+        .match.completed {
+            background-color: #f0f8f0;
+        }
+        
         .team {
             flex: 1;
             text-align: center;
@@ -179,6 +203,19 @@
             text-align: center;
             border: 1px solid #ddd;
             border-radius: 4px;
+        }
+        
+        .score-display {
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        .group-badge {
+            background-color: var(--light);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            color: var(--dark);
         }
         
         .btn {
@@ -263,6 +300,32 @@
             margin-top: 1.5rem;
         }
         
+        .stats {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            flex: 1;
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+        
+        .stat-label {
+            color: var(--dark);
+            font-size: 0.9rem;
+        }
+        
         @media (max-width: 768px) {
             .groups-container {
                 grid-template-columns: 1fr;
@@ -281,6 +344,10 @@
                 min-width: 120px;
                 text-align: center;
             }
+            
+            .stats {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
@@ -291,14 +358,56 @@
     </header>
     
     <div class="container">
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="totalMatches">0</div>
+                <div class="stat-label">Total de Jogos</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="completedMatches">0</div>
+                <div class="stat-label">Jogos Realizados</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="remainingMatches">0</div>
+                <div class="stat-label">Jogos Restantes</div>
+            </div>
+        </div>
+        
         <div class="tabs">
-            <div class="tab active" data-tab="groups">Grupos</div>
+            <div class="tab active" data-tab="overall">Classificação Geral</div>
+            <div class="tab" data-tab="groups">Grupos</div>
             <div class="tab" data-tab="matches">Jogos</div>
             <div class="tab" data-tab="finals">Fase Final</div>
             <div class="tab" data-tab="rules">Regulamento</div>
         </div>
         
-        <div id="groups" class="tab-content active">
+        <div id="overall" class="tab-content active">
+            <h2>Classificação Geral</h2>
+            <div class="overall-ranking">
+                <table id="overallTable">
+                    <thead>
+                        <tr>
+                            <th>Pos</th>
+                            <th>Time</th>
+                            <th>Grupo</th>
+                            <th>P</th>
+                            <th>V</th>
+                            <th>E</th>
+                            <th>D</th>
+                            <th>GP</th>
+                            <th>GC</th>
+                            <th>SG</th>
+                            <th>Pts</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Preenchido via JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div id="groups" class="tab-content">
             <h2>Classificação dos Grupos</h2>
             <div class="groups-container">
                 <!-- Grupos serão preenchidos via JavaScript -->
@@ -344,7 +453,7 @@
     </div>
 
     <script>
-        // Dados iniciais do torneio
+        // Dados iniciais do torneio com resultados já conhecidos
         const tournamentData = {
             groups: {
                 A: [
@@ -373,33 +482,33 @@
                 ]
             },
             matches: [
-                // Grupo A
-                { date: "13/10", time: "18:30", group: "A", team1: "LA U", team2: "CANIL FC", score1: null, score2: null },
-                { date: "13/10", time: "19:05", group: "A", team1: "BUROCRATAS FC", team2: "PERNAS DE PAU FC", score1: null, score2: null },
-                { date: "15/10", time: "20:15", group: "A", team1: "LA U", team2: "PERNAS DE PAU FC", score1: null, score2: null },
-                { date: "15/10", time: "20:50", group: "A", team1: "CANIL FC", team2: "BUROCRATAS FC", score1: null, score2: null },
+                // Grupo A - Resultados conhecidos
+                { date: "13/10", time: "18:30", group: "A", team1: "LA U", team2: "CANIL FC", score1: 0, score2: 1 },
+                { date: "13/10", time: "19:05", group: "A", team1: "BUROCRATAS FC", team2: "PERNAS DE PAU FC", score1: 0, score2: 6 },
+                { date: "15/10", time: "20:15", group: "A", team1: "LA U", team2: "PERNAS DE PAU FC", score1: 4, score2: 3 },
+                { date: "15/10", time: "20:50", group: "A", team1: "CANIL FC", team2: "BUROCRATAS FC", score1: 1, score2: 1 },
                 { date: "20/10", time: "19:05", group: "A", team1: "LA U", team2: "BUROCRATAS FC", score1: null, score2: null },
                 { date: "20/10", time: "19:40", group: "A", team1: "CANIL FC", team2: "PERNAS DE PAU FC", score1: null, score2: null },
                 
-                // Grupo B
-                { date: "13/10", time: "19:40", group: "B", team1: "SOP", team2: "FEPAMLADEIROS", score1: null, score2: null },
-                { date: "13/10", time: "20:15", group: "B", team1: "FGTAS", team2: "PANELA FUTSAL", score1: null, score2: null },
+                // Grupo B - Resultados conhecidos
+                { date: "13/10", time: "19:40", group: "B", team1: "SOP", team2: "FEPAMLADEIROS", score1: 1, score2: 3 },
+                { date: "13/10", time: "20:15", group: "B", team1: "FGTAS", team2: "PANELA FUTSAL", score1: 1, score2: 7 },
                 { date: "17/10", time: "18:30", group: "B", team1: "SOP", team2: "PANELA FUTSAL", score1: null, score2: null },
                 { date: "17/10", time: "19:05", group: "B", team1: "FEPAMLADEIROS", team2: "FGTAS", score1: null, score2: null },
                 { date: "20/10", time: "20:15", group: "B", team1: "SOP", team2: "FGTAS", score1: null, score2: null },
                 { date: "20/10", time: "20:50", group: "B", team1: "FEPAMLADEIROS", team2: "PANELA FUTSAL", score1: null, score2: null },
                 
-                // Grupo C
-                { date: "13/10", time: "20:50", group: "C", team1: "MEIA BOCA JRS FT", team2: "SEDUC TEAM", score1: null, score2: null },
-                { date: "15/10", time: "18:30", group: "C", team1: "SEDEENTARIOS", team2: "100 STRESS", score1: null, score2: null },
+                // Grupo C - Resultados conhecidos
+                { date: "13/10", time: "20:50", group: "C", team1: "MEIA BOCA JRS FT", team2: "SEDUC TEAM", score1: 4, score2: 1 },
+                { date: "15/10", time: "18:30", group: "C", team1: "SEDEENTARIOS", team2: "100 STRESS", score1: 1, score2: 5 },
                 { date: "17/10", time: "19:40", group: "C", team1: "MEIA BOCA JRS FT", team2: "100 STRESS", score1: null, score2: null },
                 { date: "17/10", time: "20:15", group: "C", team1: "SEDUC TEAM", team2: "SEDEENTARIOS", score1: null, score2: null },
                 { date: "22/10", time: "18:30", group: "C", team1: "MEIA BOCA JRS FT", team2: "SEDEENTARIOS", score1: null, score2: null },
                 { date: "22/10", time: "19:05", group: "C", team1: "SEDUC TEAM", team2: "100 STRESS", score1: null, score2: null },
                 
-                // Grupo D
-                { date: "15/10", time: "19:05", group: "D", team1: "SPORT CLUB SSPS", team2: "ESCORPIÃO", score1: null, score2: null },
-                { date: "15/10", time: "19:40", group: "D", team1: "SJCDH", team2: "SEDUR", score1: null, score2: null },
+                // Grupo D - Resultados conhecidos
+                { date: "15/10", time: "19:05", group: "D", team1: "SPORT CLUB SSPS", team2: "ESCORPIÃO", score1: 3, score2: 3 },
+                { date: "15/10", time: "19:40", group: "D", team1: "SJCDH", team2: "SEDUR", score1: 2, score2: 5 },
                 { date: "17/10", time: "20:50", group: "D", team1: "SPORT CLUB SSPS", team2: "SEDUR", score1: null, score2: null },
                 { date: "20/10", time: "18:30", group: "D", team1: "ESCORPIÃO", team2: "SJCDH", score1: null, score2: null },
                 { date: "22/10", time: "19:40", group: "D", team1: "SPORT CLUB SSPS", team2: "SJCDH", score1: null, score2: null },
@@ -508,6 +617,74 @@
             }
         }
 
+        // Calcular classificação geral
+        function calculateOverallStandings() {
+            const allTeams = [];
+            
+            for (const group in tournamentData.groups) {
+                tournamentData.groups[group].forEach(team => {
+                    allTeams.push({
+                        ...team,
+                        group: group
+                    });
+                });
+            }
+            
+            // Ordenar por pontos, saldo de gols, gols pró
+            return allTeams.sort((a, b) => {
+                if (a.points !== b.points) return b.points - a.points;
+                
+                const aGoalDiff = a.goalsFor - a.goalsAgainst;
+                const bGoalDiff = b.goalsFor - b.goalsAgainst;
+                if (aGoalDiff !== bGoalDiff) return bGoalDiff - aGoalDiff;
+                
+                if (a.goalsFor !== b.goalsFor) return b.goalsFor - a.goalsFor;
+                
+                return a.name.localeCompare(b.name);
+            });
+        }
+
+        // Atualizar estatísticas
+        function updateStats() {
+            const totalMatches = tournamentData.matches.length;
+            const completedMatches = tournamentData.matches.filter(match => 
+                match.score1 !== null && match.score2 !== null
+            ).length;
+            const remainingMatches = totalMatches - completedMatches;
+            
+            document.getElementById('totalMatches').textContent = totalMatches;
+            document.getElementById('completedMatches').textContent = completedMatches;
+            document.getElementById('remainingMatches').textContent = remainingMatches;
+        }
+
+        // Renderizar classificação geral
+        function renderOverallStandings() {
+            const overallTable = document.querySelector('#overallTable tbody');
+            const overallStandings = calculateOverallStandings();
+            
+            let html = '';
+            overallStandings.forEach((team, index) => {
+                const goalDiff = team.goalsFor - team.goalsAgainst;
+                const isQualified = index < 4; // Primeiros 4 times (1º de cada grupo)
+                
+                html += `<tr ${isQualified ? 'class="qualified"' : ''}>
+                    <td>${index + 1}${isQualified ? 'º ✓' : 'º'}</td>
+                    <td><strong>${team.name}</strong></td>
+                    <td>${team.group}</td>
+                    <td>${team.played}</td>
+                    <td>${team.wins}</td>
+                    <td>${team.draws}</td>
+                    <td>${team.losses}</td>
+                    <td>${team.goalsFor}</td>
+                    <td>${team.goalsAgainst}</td>
+                    <td>${goalDiff}</td>
+                    <td><strong>${team.points}</strong></td>
+                </tr>`;
+            });
+            
+            overallTable.innerHTML = html;
+        }
+
         // Renderizar grupos
         function renderGroups() {
             const groupsContainer = document.querySelector('.groups-container');
@@ -534,10 +711,12 @@
                     </thead>
                     <tbody>`;
                 
-                tournamentData.groups[group].forEach(team => {
+                tournamentData.groups[group].forEach((team, index) => {
                     const goalDiff = team.goalsFor - team.goalsAgainst;
-                    html += `<tr>
-                        <td>${team.name}</td>
+                    const isFirst = index === 0;
+                    
+                    html += `<tr ${isFirst ? 'class="qualified"' : ''}>
+                        <td>${team.name}${isFirst ? ' ✓' : ''}</td>
                         <td>${team.played}</td>
                         <td>${team.wins}</td>
                         <td>${team.draws}</td>
@@ -577,12 +756,22 @@
                 let html = `<h4>${date}</h4>`;
                 
                 matchesByDate[date].forEach(match => {
-                    html += `<div class="match">
-                        <div class="team">${match.team1}</div>
-                        <input type="number" class="score-input" data-match="${match.team1}-${match.team2}" data-team="1" value="${match.score1 !== null ? match.score1 : ''}" min="0">
+                    const isCompleted = match.score1 !== null && match.score2 !== null;
+                    
+                    html += `<div class="match ${isCompleted ? 'completed' : ''}">
+                        <div class="team">${match.team1}</div>`;
+                    
+                    if (isCompleted) {
+                        html += `<div class="score-display">${match.score1}</div>
                         <div class="vs">X</div>
-                        <input type="number" class="score-input" data-match="${match.team1}-${match.team2}" data-team="2" value="${match.score2 !== null ? match.score2 : ''}" min="0">
-                        <div class="team">${match.team2}</div>
+                        <div class="score-display">${match.score2}</div>`;
+                    } else {
+                        html += `<input type="number" class="score-input" data-match="${match.team1}-${match.team2}" data-team="1" value="" min="0">
+                        <div class="vs">X</div>
+                        <input type="number" class="score-input" data-match="${match.team1}-${match.team2}" data-team="2" value="" min="0">`;
+                    }
+                    
+                    html += `<div class="team">${match.team2}</div>
                         <div class="group-badge">Grupo ${match.group}</div>
                     </div>`;
                 });
@@ -613,7 +802,9 @@
                         if (match.score1 !== null && match.score2 !== null) {
                             calculateGroupStandings();
                             renderGroups();
+                            renderOverallStandings();
                             renderFinals();
+                            updateStats();
                         }
                     }
                 });
@@ -642,24 +833,44 @@
                     team2Name = tournamentData.groups[group][0]?.name || match.team2;
                 }
                 
-                semifinalsHtml += `<div class="match">
-                    <div class="team">${team1Name}</div>
-                    <input type="number" class="score-input" data-final="semifinal${index}" data-team="1" value="${match.score1 !== null ? match.score1 : ''}" min="0">
+                const isCompleted = match.score1 !== null && match.score2 !== null;
+                
+                semifinalsHtml += `<div class="match ${isCompleted ? 'completed' : ''}">
+                    <div class="team">${team1Name}</div>`;
+                
+                if (isCompleted) {
+                    semifinalsHtml += `<div class="score-display">${match.score1}</div>
                     <div class="vs">X</div>
-                    <input type="number" class="score-input" data-final="semifinal${index}" data-team="2" value="${match.score2 !== null ? match.score2 : ''}" min="0">
-                    <div class="team">${team2Name}</div>
+                    <div class="score-display">${match.score2}</div>`;
+                } else {
+                    semifinalsHtml += `<input type="number" class="score-input" data-final="semifinal${index}" data-team="1" value="" min="0">
+                    <div class="vs">X</div>
+                    <input type="number" class="score-input" data-final="semifinal${index}" data-team="2" value="" min="0">`;
+                }
+                
+                semifinalsHtml += `<div class="team">${team2Name}</div>
                 </div>`;
             });
             semifinalsContainer.innerHTML = semifinalsHtml;
 
             // Final
             const finalMatch = tournamentData.finals.final;
-            let finalHtml = `<div class="match">
-                <div class="team">${finalMatch.team1}</div>
-                <input type="number" class="score-input" data-final="final" data-team="1" value="${finalMatch.score1 !== null ? finalMatch.score1 : ''}" min="0">
+            const isFinalCompleted = finalMatch.score1 !== null && finalMatch.score2 !== null;
+            
+            let finalHtml = `<div class="match ${isFinalCompleted ? 'completed' : ''}">
+                <div class="team">${finalMatch.team1}</div>`;
+            
+            if (isFinalCompleted) {
+                finalHtml += `<div class="score-display">${finalMatch.score1}</div>
                 <div class="vs">X</div>
-                <input type="number" class="score-input" data-final="final" data-team="2" value="${finalMatch.score2 !== null ? finalMatch.score2 : ''}" min="0">
-                <div class="team">${finalMatch.team2}</div>
+                <div class="score-display">${finalMatch.score2}</div>`;
+            } else {
+                finalHtml += `<input type="number" class="score-input" data-final="final" data-team="1" value="" min="0">
+                <div class="vs">X</div>
+                <input type="number" class="score-input" data-final="final" data-team="2" value="" min="0">`;
+            }
+            
+            finalHtml += `<div class="team">${finalMatch.team2}</div>
             </div>`;
             finalContainer.innerHTML = finalHtml;
 
@@ -793,10 +1004,12 @@
             calculateGroupStandings();
             
             // Renderizar todas as seções
+            renderOverallStandings();
             renderGroups();
             renderMatches();
             renderFinals();
             renderRules();
+            updateStats();
             
             // Configurar tabs
             document.querySelectorAll('.tab').forEach(tab => {
