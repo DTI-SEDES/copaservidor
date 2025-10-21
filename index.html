@@ -10,14 +10,14 @@
     <header>
         <h1>COPA DOS SERVIDORES</h1>
         <div class="subtitle">Futsal 2024 - Poder Executivo Estadual</div>
-        <!-- BOTÃO ADMIN ADICIONADO AQUI -->
+        <!-- BOTÃO ADMIN -->
         <button id="adminLogin" class="btn" style="position: absolute; top: 1rem; right: 1rem; z-index: 1000;">
             🔒 Admin
         </button>
     </header>
 
     <div class="container">
-        <!-- CONTROLES ADMIN - ADICIONADO -->
+        <!-- CONTROLES ADMIN -->
         <div id="adminControls" class="admin-controls">
             <div class="admin-info">
                 <div class="admin-badge">Modo Administrativo Ativo</div>
@@ -25,7 +25,7 @@
             </div>
         </div>
 
-        <!-- STATS E CONTEÚDO EXISTENTE -->
+        <!-- ESTATÍSTICAS -->
         <div class="stats">
             <div class="stat-card">
                 <div class="stat-number" id="totalMatches">24</div>
@@ -41,16 +41,93 @@
             </div>
         </div>
 
-        <!-- TABS E DEMAIS CONTEÚDO... -->
+        <!-- TABS DE NAVEGAÇÃO -->
+        <div class="tabs">
+            <div class="tab active" data-tab="overall">Classificação Geral</div>
+            <div class="tab" data-tab="groups">Grupos</div>
+            <div class="tab" data-tab="matches">Jogos</div>
+            <div class="tab" data-tab="finals">Fase Final</div>
+            <div class="tab" data-tab="rules">Regulamento</div>
+        </div>
 
-        <!-- BOTÕES DE AÇÃO - ADICIONADO -->
+        <!-- CONTEÚDO DAS TABS -->
+
+        <!-- TAB 1: CLASSIFICAÇÃO GERAL -->
+        <div id="overall" class="tab-content active">
+            <div class="overall-ranking">
+                <h2>Classificação Geral</h2>
+                <div style="overflow-x: auto;">
+                    <table id="overallTable">
+                        <thead>
+                            <tr>
+                                <th>Pos</th>
+                                <th>Time</th>
+                                <th>Grupo</th>
+                                <th>P</th>
+                                <th>V</th>
+                                <th>E</th>
+                                <th>D</th>
+                                <th>GP</th>
+                                <th>GC</th>
+                                <th>SG</th>
+                                <th>Pts</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Dados serão preenchidos via JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: GRUPOS -->
+        <div id="groups" class="tab-content">
+            <div class="groups-container">
+                <!-- Grupos serão preenchidos via JavaScript -->
+            </div>
+        </div>
+
+        <!-- TAB 3: JOGOS -->
+        <div id="matches" class="tab-content">
+            <div class="matches">
+                <!-- Jogos serão preenchidos via JavaScript -->
+            </div>
+        </div>
+
+        <!-- TAB 4: FASE FINAL -->
+        <div id="finals" class="tab-content">
+            <div class="finals-container">
+                <div class="final-stage">
+                    <h3>Semifinais</h3>
+                    <div class="semifinals">
+                        <!-- Semifinais serão preenchidas via JavaScript -->
+                    </div>
+                </div>
+                <div class="final-stage">
+                    <h3>Final</h3>
+                    <div class="final">
+                        <!-- Final será preenchida via JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 5: REGULAMENTO -->
+        <div id="rules" class="tab-content">
+            <div class="rules-container">
+                <!-- Regulamento será preenchido via JavaScript -->
+            </div>
+        </div>
+
+        <!-- BOTÕES DE AÇÃO -->
         <div class="action-buttons">
             <button id="saveData" class="btn btn-save">Salvar Dados</button>
             <button id="resetData" class="btn btn-reset">Resetar Dados</button>
         </div>
     </div>
 
-    <!-- MODAL DE LOGIN - ADICIONADO -->
+    <!-- MODAL DE LOGIN -->
     <div id="loginModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
