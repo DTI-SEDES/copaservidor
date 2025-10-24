@@ -73,7 +73,7 @@ const tournamentData = {
 // Credenciais do ADM
 const ADMIN_CREDENTIALS = {
     username: "admin",
-    password: "copaservidor2024"
+    password: "admsedes"
 };
 
 // Estado da aplicação
